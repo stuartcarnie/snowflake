@@ -2,7 +2,7 @@
 
 Snowflake is a HTTP server for generating unique ID numbers.
 
-This is a Golang implementation of Twitter's Snowflake.
+This is a Go implementation of Twitter's Snowflake.
 
 ## Performance
 
@@ -17,7 +17,7 @@ ID number is composed of:
 
 This is equal to Twitter's Snowflake.
 
-## Lisence
+## Licence
 
 Apache License 2.0
 
