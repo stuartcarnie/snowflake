@@ -108,16 +108,16 @@ func TestServerNextUnique(t *testing.T) {
 	ids := make([]int64, 10000)
 	s := NewServer(8181, 0, 2)
 	for i := 0; i < 10000; i++ {
-		m, err := s.Next()
+		m, err := s.Next(1)
 		if err != nil {
 			t.Error(err)
 		}
 		for _, n := range ids {
-			if n == m {
+			if n == m[0] {
 				t.Errorf("duplicate id: %d", n)
 			}
 		}
-		ids[i] = m
+		ids[i] = m[0]
 	}
 }
 

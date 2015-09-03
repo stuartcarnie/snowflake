@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const Epoch int64 = 1288834974657
+const Epoch int64 = 1413817200000
 
 const ServerBits uint8 = 10
 const SequenceBits uint8 = 12
@@ -49,6 +49,7 @@ func NewServer(port, serverId, serverNum int) *Server {
 	for n := 0; n < serverNum; n++ {
 		workers <- NewWorker(serverId + n)
 	}
+
 	return &Server{
 		port:    port,
 		workers: workers,
@@ -61,28 +62,43 @@ func (s *Server) ListenAndServe() error {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	id, err := s.Next()
-	var status int
-	var message string
-	if err != nil {
-		status = http.StatusInternalServerError
-		message = err.Error()
-	} else {
-		status = http.StatusOK
-		message = strconv.FormatInt(id, 10)
+	var err error
+	c := req.URL.Query().Get("count")
+	n := 1
+	if c != "" {
+		if n, err = strconv.Atoi(c); err != nil || n < 1 || n > 500 {
+			http.Error(w, "invalid count; must be a valid integer from 1 to 500", http.StatusBadRequest)
+			return
+		}
 	}
-	w.WriteHeader(status)
-	if message != "" {
-		bstr := []byte(message)
-		w.Write(bstr)
+
+	if ids, err := s.Next(n); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		nl := []byte("\n")
+		buf := [32]byte{}
+		for _, id := range ids {
+			res := strconv.AppendInt(buf[:0], id, 10)
+			w.Write(res)
+			w.Write(nl)
+		}
 	}
 }
 
-func (s *Server) Next() (int64, error) {
+func (s *Server) Next(n int) ([]int64, error) {
 	worker := <-s.workers
-	id, err := worker.Next()
+
+	ids := make([]int64, n)
+	var err error
+	for p := 0; p < n; p++ {
+		if ids[p], err = worker.Next(); err != nil {
+			break
+		}
+	}
+
 	s.workers <- worker
-	return id, err
+
+	return ids, err
 }
 
 func (s *Worker) Next() (int64, error) {
@@ -102,7 +118,7 @@ func (s *Worker) Next() (int64, error) {
 	tp := (t - Epoch) << TimeShift
 	sp := int64(s.serverId << ServerShift)
 	n := tp | sp | int64(s.sequence)
-	//log.Print(n, t, s.serverId, s.sequence)
+
 	return n, nil
 }
 
@@ -125,8 +141,8 @@ func main() {
 	var serverNum int
 	var maxProcs int
 	flag.IntVar(&portNumber, "port", 8181, "port")
-	flag.IntVar(&serverId, "server", 0, "server")
-	flag.IntVar(&serverNum, "num", 1, "num")
+	flag.IntVar(&serverId, "id", 0, "server id")
+	flag.IntVar(&serverNum, "num", 1, "number of workers")
 	flag.IntVar(&maxProcs, "proc", 0, "proc")
 	flag.Parse()
 	if maxProcs == 0 {
