@@ -9,7 +9,9 @@ This is a Go implementation of [Twitter Snowflake](https://blog.twitter.com/2010
 Usage
 -----
 
-curl http://server:port?count=n; where 1 ≤ n ≤ 500
+    curl http://server:port?count=n 
+
+    where 1 ≤ n ≤ 500
 
 each id will be a 64-bit number represented as a string, structured as follows:
 
