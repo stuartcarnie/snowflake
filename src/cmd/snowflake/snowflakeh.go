@@ -10,17 +10,18 @@ import (
 	"time"
 )
 
-const Epoch int64 = 1413817200000
+const (
+	Epoch int64 = 1413817200000
 
-const ServerBits uint8 = 10
-const SequenceBits uint8 = 12
+	ServerBits   uint8 = 10
+	SequenceBits uint8 = 12
+	ServerShift  uint8 = SequenceBits
+	TimeShift    uint8 = SequenceBits + ServerBits
 
-const ServerShift uint8 = SequenceBits
-const TimeShift uint8 = SequenceBits + ServerBits
+	ServerMax int = -1 ^ (-1 << ServerBits)
 
-const ServerMax int = -1 ^ (-1 << ServerBits)
-
-const SequenceMask int32 = -1 ^ (-1 << SequenceBits)
+	SequenceMask int32 = -1 ^ (-1 << SequenceBits)
+)
 
 type Worker struct {
 	serverId      int
