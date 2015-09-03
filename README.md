@@ -26,6 +26,22 @@ where
 * `m` (machine id) is a 10-bit integer representing the server id
 * `t` (time) is a 42-bit integer representing the current timestamp in milliseconds
     * the number of milliseconds to have elapsed since 1413817200000 or 2014-10-20T15:00:00.000Z
+    
+Building
+--------
+
+Prerequisite is [gb](https://github.com/constabulary/gb)
+
+    git clone https://github.com/stuartcarnie/snowflake.git 
+    cd snowflake
+    gb build
+    
+Running
+-------
+
+    bin/snowflake
+    
+    curl localhost:8181
 
 Licence
 -------
